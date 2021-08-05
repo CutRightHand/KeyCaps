@@ -4,6 +4,7 @@ import math
 
 UNIT = 19.05
 CU = 18.415
+CAP_TOP = 12.7
 
 def sa_front_profile(alpha, height, width, concave = True):
     r = 12.7
@@ -28,7 +29,7 @@ def sa_front_profile(alpha, height, width, concave = True):
     return cronk
 
 
-def sa_sideways_profile(alpha, height, width, concave = True):
+def sa_sideways_profile(alpha, height, rwidth, uwidth, concave = True):
     r = 12.7
     alpha_rad = (alpha*math.pi)/180
 
@@ -36,7 +37,7 @@ def sa_sideways_profile(alpha, height, width, concave = True):
 
     w = (CU - r * math.cos(alpha_rad)) / 2
 
-    dish = cq.Workplane("XY").sphere(33.5).translate([0, 0, height+33.5-1.2])
+    dish = sa_indent(height, uwidth)
     #show_object(dish)
     
     return cq.Workplane("YZ")\
@@ -44,16 +45,32 @@ def sa_sideways_profile(alpha, height, width, concave = True):
         .sagittaArc((CU/2 - w, height + r*math.sin(alpha_rad)), -0.5)\
         .lineTo(-CU/2 + w, height)\
         .sagittaArc((-CU/2, 0), -0.5)\
-        .close().extrude(width/2, both=True)\
-        .intersect(sa_front_profile(alpha, height, width, concave)).cut(dish)
+        .close().extrude(rwidth / 2, both=True)\
+        .intersect(sa_front_profile(alpha, height, rwidth, concave))#.cut(dish)#.edges(cq.selectors.BoxSelector((-UNIT * rwidth, -UNIT, 4), (UNIT * rwidth, UNIT, 20))).fillet(0.5)
 
-def sa_profile(row, width):
+def sa_indent(height, width):
+    DISH_RADIUS = 55
+    DIP = 1.2
+
+    real_width = CAP_TOP/2 # UNIT * width - (UNIT-CU)
+
+    if width == 1:
+        return cq.Workplane("YZ").sphere(DISH_RADIUS).translate([0, 0, height+DISH_RADIUS-DIP])
+
+    return cq.Workplane("YZ").sphere(DISH_RADIUS) \
+        .circle(DISH_RADIUS).extrude(real_width/2) \
+        .translate([-real_width/2, 0, height+DISH_RADIUS-DIP]) \
+        .mirror(mirrorPlane="YZ", union=True)
+
+
+def sa_profile(row, uwidth):
     BOTTOM = 11.7348
     ROWS = [[], [13, 2], [7, 0], [0, 0], [-7, 1.7], [0, 0]]
 
-    rwidth = width * UNIT - (UNIT-CU)
+    rwidth = uwidth * UNIT - (UNIT - CU)
 
-    return sa_sideways_profile(ROWS[row][0], BOTTOM + ROWS[row][1], rwidth, False if (row == 5 and width > 3) else True).edges(cq.selectors.BoxSelector((-UNIT*width, -UNIT, 5), (UNIT*width, UNIT, 11))).fillet(1)
+    return sa_sideways_profile(ROWS[row][0], BOTTOM + ROWS[row][1], rwidth, uwidth, False if (row == 5 and uwidth > 3) else True)#.faces("<Z").shell(-0.01)
+
 
 keys = [
     [
@@ -92,8 +109,9 @@ def draw_keys(keys):
 
         roff += 1
 
-#draw_keys(keys)
-draw_keys([[[3, 1]]])
+draw_keys(keys)
+#draw_keys([[[3, 2]]])
+#show_object(sa_indent(0, 2))
 
 #show_object(profile(0, BOTTOM, UNIT, False).translate([0, -1*UNIT, 0]))
 #show_object(profile(7, BOTTOM+0.5).rotate(axisStartPoint=(0, 0, 0), axisEndPoint=(0, 0, 1), angleDegrees=180).translate([0, 0*UNIT, 0]))
