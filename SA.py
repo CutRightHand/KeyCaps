@@ -38,7 +38,7 @@ def sa_sideways_profile(alpha, height, rwidth, uwidth, concave = True):
     w = (CU - r * math.cos(alpha_rad)) / 2
 
     dish = sa_indent(height, uwidth)
-    #show_object(dish)
+    #show_object(dish, "Cutter", {'alpha': 0.75})
     
     return cq.Workplane("YZ")\
         .moveTo(CU/2, 0)\
@@ -49,13 +49,13 @@ def sa_sideways_profile(alpha, height, rwidth, uwidth, concave = True):
         .intersect(sa_front_profile(alpha, height, rwidth, concave))#.cut(dish)#.edges(cq.selectors.BoxSelector((-UNIT * rwidth, -UNIT, 4), (UNIT * rwidth, UNIT, 20))).fillet(0.5)
 
 def sa_indent(height, width):
-    DISH_RADIUS = 55
-    DIP = 1.2
+    DISH_RADIUS = 45
+    DIP = 0.738
 
     real_width = CAP_TOP/2 # UNIT * width - (UNIT-CU)
 
     if width == 1:
-        return cq.Workplane("YZ").sphere(DISH_RADIUS).translate([0, 0, height+DISH_RADIUS-DIP])
+        return cq.Workplane("YZ").sphere(DISH_RADIUS).translate([0, +0.2, height+DISH_RADIUS-DIP])
 
     return cq.Workplane("YZ").sphere(DISH_RADIUS) \
         .circle(DISH_RADIUS).extrude(real_width/2) \
@@ -109,14 +109,22 @@ def draw_keys(keys):
 
         roff += 1
 
-draw_keys(keys)
-#draw_keys([[[3, 2]]])
+#draw_keys(keys)
+#draw_keys([[[3, 1]]])
 #show_object(sa_indent(0, 2))
 
 #show_object(profile(0, BOTTOM, UNIT, False).translate([0, -1*UNIT, 0]))
 #show_object(profile(7, BOTTOM+0.5).rotate(axisStartPoint=(0, 0, 0), axisEndPoint=(0, 0, 1), angleDegrees=180).translate([0, 0*UNIT, 0]))
-#show_object(sa_profile(3, 1))
+show_object(sa_profile(1, 1), "SA Profile", {'alpha': 0.3, 'color': 'blue'})
 #show_object(profile(7, BOTTOM+0.5).translate([0, 2*UNIT, 0]))
 #show_object(profile(13, BOTTOM+2).translate([0, 3*UNIT, 0]))
 
 
+LOFT = 1
+LA = 1
+
+cronk = cq.Workplane("XY").rect(CU, CU)
+cronk = cronk.workplane(offset = LOFT).transformed(rotate = (LA, 0, 0)).rect(CU * 0.99, CU * 0.99)
+cronk = cronk.add(cq.Workplane("XY")).transformed(offset = (0, 0, 14.2), rotate = (13 - LA, 0, 0)).rect(CAP_TOP, CAP_TOP)
+cronk = cronk.loft()#.faces("<Z").shell(-1)
+show_object(cronk, "Loft profile", {'alpha': 0.3, 'color': 'red'})
