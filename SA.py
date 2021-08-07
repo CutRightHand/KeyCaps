@@ -1,75 +1,46 @@
 import cadquery as cq
 import math
 
-
 UNIT = 19.05
 CU = 18.415
 CAP_TOP = 12.7
 
-def sa_front_profile(alpha, height, width, concave = True):
-    r = 12.7
-    w = (CU-r)/2
-    alpha_rad = (alpha*math.pi)/180
-
-    dish = (1 if concave else -1) * 1
-
-    rp = (CU - r * math.cos(alpha_rad)) / 2
-
-    cronk = cq.Workplane("XZ") \
-        .moveTo(width/2, 0) \
-        .sagittaArc((width/2 - w, height), -0.5) \
-        .lineTo(-width/2+w, height) \
-        .sagittaArc((-width/2, 0), -0.5) \
-        .close().extrude(UNIT, both=True)\
-        .union(cq.Workplane("XY").box(width, 2*UNIT, UNIT, centered=[True, True, False]).translate([0, 0, -UNIT]))\
-        .rotate(axisStartPoint=(0, -CU/2+rp, height), axisEndPoint=(1, -CU/2+rp, height), angleDegrees=alpha)
-    
-    #show_object(cronk)
-    
-    return cronk
-
-
-def sa_sideways_profile(alpha, height, rwidth, uwidth, concave = True):
-    r = 12.7
-    alpha_rad = (alpha*math.pi)/180
-
-    dish = (1 if concave else -1) * 0.8
-
-    w = (CU - r * math.cos(alpha_rad)) / 2
-
-    dish = sa_indent(height, uwidth)
-    #show_object(dish, "Cutter", {'alpha': 0.75})
-    
-    return cq.Workplane("YZ")\
-        .moveTo(CU/2, 0)\
-        .sagittaArc((CU/2 - w, height + r*math.sin(alpha_rad)), -0.5)\
-        .lineTo(-CU/2 + w, height)\
-        .sagittaArc((-CU/2, 0), -0.5)\
-        .close().extrude(rwidth / 2, both=True)\
-        .intersect(sa_front_profile(alpha, height, rwidth, concave))#.cut(dish)#.edges(cq.selectors.BoxSelector((-UNIT * rwidth, -UNIT, 4), (UNIT * rwidth, UNIT, 20))).fillet(0.5)
-
-def sa_indent(height, width):
-    DISH_RADIUS = 45
+def sa_indent(height, uwidth):
+    DISH_RADIUS = 55
     DIP = 0.738
 
-    real_width = CAP_TOP/2 # UNIT * width - (UNIT-CU)
+    rwidth = UNIT * uwidth - (UNIT-CAP_TOP)
 
-    if width == 1:
-        return cq.Workplane("YZ").sphere(DISH_RADIUS).translate([0, +0.2, height+DISH_RADIUS-DIP])
+    if uwidth == 1:
+        return cq.Workplane("YZ").sphere(DISH_RADIUS).translate([0, 0, height+DISH_RADIUS-DIP])
 
     return cq.Workplane("YZ").sphere(DISH_RADIUS) \
-        .circle(DISH_RADIUS).extrude(real_width/2) \
-        .translate([-real_width/2, 0, height+DISH_RADIUS-DIP]) \
+        .circle(DISH_RADIUS).extrude(rwidth/2) \
+        .translate([-rwidth/2 +CAP_TOP/2, 0, height+DISH_RADIUS-DIP]) \
         .mirror(mirrorPlane="YZ", union=True)
+
+def sa_profile_loft(angle, uwidth, height):
+    LOFT = 2
+
+    rwidth = UNIT * uwidth - (UNIT - CU)
+    rwidth_cap = UNIT * uwidth - (UNIT - CAP_TOP)
+
+    cronk = cq.Workplane("XY").rect(rwidth, CU)
+    cronk = cronk.workplane(offset=LOFT).transformed(rotate=(0, 0, 0)).rect(rwidth - 0.1, CU * 0.99)
+    cronk = cronk.add(cq.Workplane("XY")).transformed(offset=(0, 0, height-LOFT), rotate=(angle, 0, 0)).rect(rwidth_cap, CAP_TOP)
+    cronk = cronk.loft()#.faces("<Z").shell(-1)
+
+    dish = sa_indent(height, uwidth)
+    #cronk = cronk.cut(dish)
+
+    return cronk
 
 
 def sa_profile(row, uwidth):
     BOTTOM = 11.7348
-    ROWS = [[], [13, 2], [7, 0], [0, 0], [-7, 1.7], [0, 0]]
+    ROWS = [[], [13, 3.5], [7, 1], [0, 0], [-7, 1], [0, 0]]
 
-    rwidth = uwidth * UNIT - (UNIT - CU)
-
-    return sa_sideways_profile(ROWS[row][0], BOTTOM + ROWS[row][1], rwidth, uwidth, False if (row == 5 and uwidth > 3) else True)#.faces("<Z").shell(-0.01)
+    return sa_profile_loft(ROWS[row][0], uwidth, BOTTOM+ROWS[row][1])
 
 
 keys = [
@@ -92,9 +63,6 @@ keys = [
 ]
 
 
-
-
-
 def draw_keys(keys):
     roff = 0
     coff = 0
@@ -109,22 +77,16 @@ def draw_keys(keys):
 
         roff += 1
 
+#show_object(cq.Workplane("XY").box(UNIT, UNIT, UNIT, centered = [True, True, False]),
+#            "Unit cube",
+#            {
+#                'color': '#333',
+#                'alpha': 0.3
+#            })
+
+
+
 #draw_keys(keys)
-#draw_keys([[[3, 1]]])
-#show_object(sa_indent(0, 2))
+#draw_keys([[[3, 2]]])
+show_object(sa_profile(3, 2))
 
-#show_object(profile(0, BOTTOM, UNIT, False).translate([0, -1*UNIT, 0]))
-#show_object(profile(7, BOTTOM+0.5).rotate(axisStartPoint=(0, 0, 0), axisEndPoint=(0, 0, 1), angleDegrees=180).translate([0, 0*UNIT, 0]))
-show_object(sa_profile(1, 1), "SA Profile", {'alpha': 0.3, 'color': 'blue'})
-#show_object(profile(7, BOTTOM+0.5).translate([0, 2*UNIT, 0]))
-#show_object(profile(13, BOTTOM+2).translate([0, 3*UNIT, 0]))
-
-
-LOFT = 1
-LA = 1
-
-cronk = cq.Workplane("XY").rect(CU, CU)
-cronk = cronk.workplane(offset = LOFT).transformed(rotate = (LA, 0, 0)).rect(CU * 0.99, CU * 0.99)
-cronk = cronk.add(cq.Workplane("XY")).transformed(offset = (0, 0, 14.2), rotate = (13 - LA, 0, 0)).rect(CAP_TOP, CAP_TOP)
-cronk = cronk.loft()#.faces("<Z").shell(-1)
-show_object(cronk, "Loft profile", {'alpha': 0.3, 'color': 'red'})

@@ -13,5 +13,5 @@ LA = 1
 cronk = cq.Workplane("XY").rect(CU, CU)
 cronk = cronk.workplane(offset = LOFT).transformed(rotate = (LA, 0, 0)).rect(CU * 0.99, CU * 0.99)
 cronk = cronk.workplane(offset =BOTTOM - LOFT).transformed(rotate = (13 - LA, 0, 0)).rect(CAP_TOP, CAP_TOP)
-cronk = cronk.loft()#.faces("<Z").shell(-1)#.faces("not <Z").fillet(0.5)
+cronk = cronk.loft().faces("<Z").shell(-1)#.faces("not <Z").fillet(0.5)
 show_object(cronk)
