@@ -5,18 +5,20 @@ UNIT = 19.05
 CU = 18.415
 CAP_TOP = 12.7
 
-def sa_indent(height, uwidth):
+def sa_indent(angle, height, uwidth):
     DISH_RADIUS = 55
     DIP = 0.738
 
     rwidth = UNIT * uwidth - (UNIT-CAP_TOP)
 
+    total_dish_r = DISH_RADIUS-DIP
+
     if uwidth == 1:
-        return cq.Workplane("YZ").sphere(DISH_RADIUS).translate([0, 0, height+DISH_RADIUS-DIP])
+        return cq.Workplane("YZ").sphere(DISH_RADIUS).translate([0, math.sin(math.radians(-angle)) * total_dish_r, height + math.cos(math.radians(-angle)) * total_dish_r])
 
     return cq.Workplane("YZ").sphere(DISH_RADIUS) \
         .circle(DISH_RADIUS).extrude(rwidth/2) \
-        .translate([-rwidth/2 +CAP_TOP/2, 0, height+DISH_RADIUS-DIP]) \
+        .translate([-rwidth/2 +CAP_TOP/2, math.sin(math.radians(-angle)) * total_dish_r, height + math.cos(math.radians(-angle)) * total_dish_r]) \
         .mirror(mirrorPlane="YZ", union=True)
 
 def sa_profile_loft(angle, uwidth, height):
@@ -30,8 +32,9 @@ def sa_profile_loft(angle, uwidth, height):
     cronk = cronk.add(cq.Workplane("XY")).transformed(offset=(0, 0, height-LOFT), rotate=(angle, 0, 0)).rect(rwidth_cap, CAP_TOP)
     cronk = cronk.loft()#.faces("<Z").shell(-1)
 
-    dish = sa_indent(height, uwidth)
-    #cronk = cronk.cut(dish)
+    dish = sa_indent(angle, height, uwidth)
+    cronk = cronk.cut(dish).edges("not <Z").fillet(1)
+    #cronk = cronk..union(cq.Workplane("XY").box(2*UNIT, 0.1, 0.1).translate([0, 0, height]))
 
     return cronk
 
@@ -87,6 +90,5 @@ def draw_keys(keys):
 
 
 #draw_keys(keys)
-#draw_keys([[[3, 2]]])
-show_object(sa_profile(3, 2))
+draw_keys([[[1, 2]]])
 
