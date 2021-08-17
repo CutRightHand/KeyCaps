@@ -7,7 +7,7 @@ CAP_TOP = 12.7
 
 def sa_indent(angle, height, uwidth):
     DISH_RADIUS = 55
-    DIP = 0.838
+    DIP = 0.738 + 0.001
 
     rwidth = UNIT * uwidth - (UNIT-CAP_TOP)
 
@@ -21,17 +21,6 @@ def sa_indent(angle, height, uwidth):
         .translate([-rwidth/2+CAP_TOP/2, math.sin(math.radians(-angle)) * total_dish_r, height + math.cos(math.radians(-angle)) * total_dish_r])\
         .mirror(mirrorPlane="YZ", union=True)
 
-def sa_indent2(angle, height, uwidth):
-    DR = 200 * uwidth
-    diagonal = math.sqrt(math.pow(CAP_TOP, 2) + math.pow(uwidth * UNIT - (UNIT-CAP_TOP), 2))
-    phi = 2 * math.asin(diagonal / (2*DR))
-    dip = DR - DR*math.cos(phi/2)
-
-    total_dish_r = DR - dip
-
-    return cq.Workplane("XY").sphere(DR)\
-        .translate([0, math.sin(math.radians(-angle)) * total_dish_r, height + math.cos(math.radians(-angle)) * total_dish_r])
-
 def sa_profile_loft(angle, uwidth, height):
     LOFT = 2
 
@@ -41,18 +30,13 @@ def sa_profile_loft(angle, uwidth, height):
     cronk = cq.Workplane("XY").rect(rwidth, CU)
     cronk = cronk.workplane(offset=LOFT).transformed(rotate=(0, 0, 0)).rect(rwidth - 0.1, CU * 0.99)
     cronk = cronk.add(cq.Workplane("XY")).transformed(offset=(0, 0, height-LOFT), rotate=(angle, 0, 0)).rect(rwidth_cap, CAP_TOP)
-    cronk = cronk.loft()#.faces("<Z").shell(-1)
+    cronk = cronk.loft()
 
     dish = sa_indent(angle, height, uwidth)
-    dish2 = sa_indent2(angle, height, uwidth)
     cronk = cronk.cut(dish)
-    #cronk = cronk.faces("<Z").shell(-3).clean().edges()#.fillet(0.1)
-    #cronk = cronk.edges("not <Z").fillet(0.25)
-    #
-    #cronk = cronk.edges(cq.selectors.SubtractSelector(cq.selectors.BoxSelector((-rwidth, -rwidth, height-2), (rwidth, rwidth, height+2)), cq.selectors.BoxSelector((-rwidth+15, -CAP_TOP/2, height-2), (rwidth-15, CAP_TOP/2, height+2))))#.chamfer(2)
-    #show_object(dish)
-    #show_object(cronk)
-    cronk = cronk.edges("not <Z").fillet(0.25)
+
+    cronk = cronk.faces("<Z").shell(-1.5, kind = 'arc')
+    cronk = cronk.edges("not <Z").fillet(1)
 
     #cronk = cq.Workplane("XY").box(UNIT, UNIT, UNIT, centered = [True, True, False]).cut(dish).edges().fillet(2)
 
@@ -100,7 +84,7 @@ def draw_keys(keys):
         roff += 1
 
 
-#draw_keys(keys)
-draw_keys([[[5, 6.5]]])
+draw_keys(keys)
+#draw_keys([[[5, 6.5]]])
 
 #show_object(sa_profile(3, 1.25))
