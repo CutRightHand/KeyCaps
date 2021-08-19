@@ -5,9 +5,12 @@ UNIT = 19.05
 CU = 18.415
 CAP_TOP = 12.7
 
+CAP_RADIUS = 1.5
+
+
 def sa_indent(angle, height, uwidth):
     DISH_RADIUS = 55
-    DIP = 0.738 + 0.001
+    DIP = 0.738 + 0.1
 
     rwidth = UNIT * uwidth - (UNIT-CAP_TOP)
 
@@ -22,25 +25,21 @@ def sa_indent(angle, height, uwidth):
         .mirror(mirrorPlane="YZ", union=True)
 
 def sa_profile_loft(angle, uwidth, height):
-    LOFT = 2
+    LOFT = 1
 
     rwidth = UNIT * uwidth - (UNIT - CU)
     rwidth_cap = UNIT * uwidth - (UNIT - CAP_TOP)
 
-    cronk = cq.Workplane("XY").rect(rwidth, CU)
-    cronk = cronk.workplane(offset=LOFT).transformed(rotate=(0, 0, 0)).rect(rwidth - 0.1, CU * 0.99)
-    cronk = cronk.add(cq.Workplane("XY")).transformed(offset=(0, 0, height-LOFT), rotate=(angle, 0, 0)).rect(rwidth_cap, CAP_TOP)
-    cronk = cronk.loft()
-
     dish = sa_indent(angle, height, uwidth)
-    cronk = cronk.cut(dish)
 
-    cronk = cronk.faces("<Z").shell(-1.5, kind = 'arc')
-    cronk = cronk.edges("not <Z").fillet(1)
+    bottom = cq.Workplane("XY").rect(rwidth - 1, CU - 1).offset2D(0.5)
+    support = cq.Workplane("XY").transformed(offset=(0, 0, LOFT)).rect(rwidth - 1.1, CU - 1.1).offset2D(0.5)
+    top = cq.Workplane("XY").transformed(offset=(0, 0, height), rotate=(angle, 0, 0)).rect(rwidth_cap - 2*CAP_RADIUS, CAP_TOP - 2*CAP_RADIUS).offset2D(1.5).consolidateWires()
 
-    #cronk = cq.Workplane("XY").box(UNIT, UNIT, UNIT, centered = [True, True, False]).cut(dish).edges().fillet(2)
+    keycap = cq.Workplane("XY").add(bottom).add(support).add(top).toPending().loft().cut(dish)
+    keycap = keycap.edges(cq.selectors.BoxSelector((-rwidth/2, -CU/2, height-2), (rwidth/2, CU/2, height+5))).fillet(0.25)
 
-    return cronk
+    return keycap
 
 
 def sa_profile(row, uwidth):
@@ -77,7 +76,9 @@ def draw_keys(keys):
         coff = 0
 
         for key in row:
-            kobj = sa_profile(key[0], key[1]).translate([(coff + key[1]/2) * UNIT, -roff * UNIT, 0])#.fillet(0.0001)
+            kobj = sa_profile(key[0], key[1]).translate([(coff + key[1]/2) * UNIT, -roff * UNIT, 0])
+            fname = "build/SA/%1dR%3dU.step" % (key[0], key[1]*100)
+            cq.exporters.export(kobj, fname)
             show_object(kobj, "Key (%.2f x %d)" % (coff, roff))
             coff += key[1]
 
@@ -85,6 +86,5 @@ def draw_keys(keys):
 
 
 draw_keys(keys)
-#draw_keys([[[5, 6.5]]])
+#draw_keys([[[3, 1.25]]])
 
-#show_object(sa_profile(3, 1.25))
