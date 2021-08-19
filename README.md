@@ -4,11 +4,13 @@
 This is a work in progress. There are many things missing. Hopefully the list of those things will grow smaller over
 time.
 
-# What is this?
+## What is this?
+![](screenshots/SA.png)
+
 CadQuery code to generate models of keyboard keycaps in various profiles, and formats. This repo hopes to be the
 authoritative place to find models for your modeling or rendering needs.
 
-# How to use 
+## How to use 
 Please visit the releases page to get an archive with the current version of the prepared resources.
 
 Alternatively, clone this repo, and then run the following to set up your environment:
@@ -22,7 +24,7 @@ Alternatively, clone this repo, and then run the following to set up your enviro
 ...
 
 
-# Filename patterns
+## Filename patterns
 
 The directories inside the archive represent the keycap profile in question, while the file names have the following
 structure:
