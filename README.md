@@ -4,7 +4,12 @@
 This is a work in progress. There are many things missing. Hopefully the list of those things will grow smaller over
 time.
 
+Notable TODOs:
+* More profiles (in order of preference: Cherry, OEM, DSA...)
+* Shell the bottoms with stems and support ribs
+
 ## What is this?
+
 ![](screenshots/SA.png)
 
 CadQuery code to generate models of keyboard keycaps in various profiles, and formats. This repo hopes to be the
@@ -17,9 +22,11 @@ Alternatively, clone this repo, and then run the following to set up your enviro
 
 ... instructions broken, fix me...
 
-> conda env create -f keycaps_env.yml -n keycaps
-> conda activate keycaps
-> Make
+```commandline
+conda env create -f keycaps_env.yml -n keycaps
+conda activate keycaps
+Make
+```
 
 ...
 
