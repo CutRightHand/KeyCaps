@@ -1,7 +1,7 @@
 import cadquery as cq
+import units
 
-UNIT = 19.05
-CU = 18.415
 
 def dummy_profile(row, uwidth, feature = None):
-    return cq.Workplane("XY").box(CU*uwidth, CU, CU, centered=[True, True, False])
+    rwidth = units.UNIT * uwidth - (units.UNIT - units.CU)
+    return cq.Workplane("XY").box(rwidth, units.CU, units.CU, centered=[True, True, False])

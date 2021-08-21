@@ -8,22 +8,28 @@ profiles = {
     'SA': SA.sa_profile
 }
 
+profile = "SA"
+
+
 keys = [
     [
-        [1, 1], [1, 2]
+        "1R", [1, 1], [1, 2]
     ],
     [
-        [2, 1], [2, 1.5]
+        "2R", [2, 1], [2, 1.5]
     ],
     [
-        [3, 1], [3, 1.75], [3, 2.25]
+        "3R", [3, 1], [3, 1.75], [3, 2.25]
     ],
     [
-        [4, 1], [4, 2.25], [4, 2.75]
+        "4R", [4, 1], [4, 2.25], [4, 2.75]
     ],
     [
-        [5, 1], [5, 1.25], [5, 1.5], [5, 2], [5, 2.25], [5, 6.5]
+        "5R", [5, 1], [5, 1.25], [5, 1.5], [5, 2], [5, 2.25], [5, 6.5]
     ],
+    [
+        profile
+    ]
 ]
 
 def draw_keys(generator, keys, writer):
@@ -33,26 +39,33 @@ def draw_keys(generator, keys, writer):
         coff = 0
 
         for key in row:
-            kobj = generator(key[0], key[1]).translate([(coff + key[1]/2) * units.UNIT, -roff * units.UNIT, 0])
-            #show_object(kobj, "Key (%.2f x %d)" % (coff, roff))
-            writer(key, kobj)
-            coff += key[1]
+            if not isinstance(key, str):
+                kobj = generator(key[0], key[1])
+                writer(key, roff, coff, kobj)
+                coff += key[1]
+            else:
+                offset = 0 if (roff+1 == len(keys)) else -30
+                halign = 'left' if (roff+1 == len(keys)) else 'right'
+                kobj = cq.Workplane("XY").text(key, units.CU, 1, halign=halign).translate([offset, -roff * units.UNIT, 0])
+                writer(key, roff, coff, kobj)
 
         roff += 1
 
-def writer_file(key, kobj):
-    fname = "build/SA/%1dR%3dU.step" % (key[0], key[1] * 100)
-    cq.exporters.export(kobj, fname)
 
-def writer_cqgui(keyspec, model):
+def writer_file(key, row, column, kobj):
+    if not isinstance(key, str):
+        fname = "build/SA/%1dR%3dU.step" % (key[0], key[1] * 100)
+        cq.exporters.export(kobj, fname)
+
+def writer_cqgui(key, row, column, model):
+    if not isinstance(key, str):
+        model = model.translate([(column + key[1]/2) * units.UNIT, -row * units.UNIT, 0])
+
     show_object(model)
 
-
-profile = "dummy"
 writer = writer_cqgui
 
-
-#draw_keys(keys)
-draw_keys(profiles[profile], [[[3, 1.25]]], writer)
+draw_keys(profiles[profile], keys, writer)
+#draw_keys(profiles[profile], [[[3, 1.25]]], writer)
 
 
