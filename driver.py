@@ -2,13 +2,15 @@ import cadquery as cq
 import units
 import SA
 import dummy
+import cherry
 
 profiles = {
     'dummy': dummy.dummy_profile,
-    'SA': SA.sa_profile
+    'SA': SA.sa_profile,
+    'Cherry': cherry.cherry_profile,
 }
 
-profile = "SA"
+profile = "Cherry"
 
 
 keys = [
