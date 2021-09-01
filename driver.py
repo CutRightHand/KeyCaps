@@ -69,5 +69,3 @@ writer = writer_cqgui
 
 draw_keys(profiles[profile], keys, writer)
 #draw_keys(profiles[profile], [[[3, 1.25]]], writer)
-
-
