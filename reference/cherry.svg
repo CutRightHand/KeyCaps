@@ -1,0 +1,25 @@
+<svg width="1140" height="200" viewBox="0 0 1140 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(0, 0)">
+        <path d="M149.54 113 L183.037 199 H6.5903 L14.0342 113 H149.54 Z" stroke="#00ff00" stroke-width="1"/>
+    </g>
+    <g transform="translate(190, 0)">
+        <path d="M153.307 107.007 L183.125 199 H6.57079 L12.782 108.262 L153.307 107.007 Z" stroke="#00ff00"
+              stroke-width="1"/>
+    </g>
+    <g transform="translate(380, 0)">
+        <path d="M151.558 125.035 L184.951 199 H4.5972 L10.77 132.553L151.558 125.035Z" stroke="#00ff00"
+              stroke-width="1"/>
+    </g>
+    <g transform="translate(570, 0)">
+        <path d="M184.371 199 H5.08 L9.24114 144.913L149.879 131.062L184.371 199Z" stroke="#00ff00"
+              stroke-width="1"/>
+    </g>
+    <g transform="translate(760, 0)">
+        <path d="M148.495 117.13L184.468 199 H5.06889 L8.76449 143.566L148.495 117.13Z" stroke="#00ff00"
+              stroke-width="1"/>
+    </g>
+    <g transform="translate(950, 0)">
+        <path d="M185.841 199 H3.58622 L8.5249 139.353C15.1836 135.057 36.1598 125.345 69.8324 119.365C103.689 113.351 132.945 116.737 143.745 119.248L185.841 199Z"
+              stroke="#00ff00" stroke-width="1"/>
+    </g>
+</svg>

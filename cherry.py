@@ -15,7 +15,7 @@ CAP_OFFSET_Y = [0.75, 0.62, 0.62, 0.42, 0.42]
 
 def cylindrical_indent(angle, height, uwidth):
     DISH_RADIUS = 55
-    DIP = 0.738 + 0.1
+    DIP = 0.37 + 0.1
 
     rwidth = units.UNIT * uwidth - (units.UNIT-CAP)
 
@@ -40,10 +40,12 @@ def cherry_profile(row, uwidth, feature = None):
     rwidth_top = units.UNIT * uwidth - (units.UNIT - CAP)
 
     bottom = cq.Workplane("XY").rect(rwidth - 2*RADIUS_BOTTOM, BOTTOM - 2*RADIUS_BOTTOM).offset2D(RADIUS_BOTTOM)
-    top = cq.Workplane("XY").transformed(offset=(0, (rwidth-rwidth_top)/2 - CAP_OFFSET_Y[row-1], ROW_HEIGHTS[row-1]), rotate=(ROW_ANGLES[row-1], 0, 0)).rect(rwidth_top - 2 * RADIUS_TOP, CAP - 2 * RADIUS_TOP).offset2D(RADIUS_TOP).consolidateWires()
+    top = cq.Workplane("XY").transformed(offset=(0, (rwidth-rwidth_top)/2 - CAP_OFFSET_Y[row-1], ROW_HEIGHTS[row-1]), rotate=(ROW_ANGLES[row-1], 0, 0)).rect(rwidth_top - 2 * RADIUS_TOP, CAP - 2 * RADIUS_TOP).offset2D(RADIUS_TOP)
 
     keycap = cq.Workplane("XY").add(bottom).add(top).toPending().loft(ruled = True)
 
-    return keycap#.cut(cylindrical_indent(ROW_ANGLES[row-1], ROW_HEIGHTS[row-1], uwidth))
+    dish = cylindrical_indent(ROW_ANGLES[row-1], ROW_HEIGHTS[row-1], uwidth)
+
+    return keycap#.cut()
 
 
